@@ -17,7 +17,7 @@ def get_admin_views(app_name):
             continue
 
         if isinstance(v, AdminViews):
-            for type, name, link in v.output_urls:
+            for type, name, link in v.output_urls():
                 if type == 'url':
                     img_url = "%sadmin_views/icons/link.png" % STATIC_URL
                     alt_text = "Link to '%s'" % name

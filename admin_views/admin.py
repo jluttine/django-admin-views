@@ -2,6 +2,7 @@ from functools import update_wrapper
 from django.contrib import admin
 from django.conf.urls import url
 from django.conf.urls import *
+from django.core.urlresolvers import reverse
 
 class AdminViews(admin.ModelAdmin):
     """
@@ -13,7 +14,7 @@ class AdminViews(admin.ModelAdmin):
         super(AdminViews, self).__init__(*args, **kwargs)
         self.direct_links = []
         self.local_view_names = []
-        self.output_urls = []
+        #self.output_urls = []
 
     def get_urls(self):
         original_urls = super(AdminViews, self).get_urls()
@@ -31,21 +32,31 @@ class AdminViews(admin.ModelAdmin):
                 )
                 self.local_view_names.append(link[0])
 
+        return added_urls + original_urls
+
+    def output_urls(self):
+        urls = []
+        for link in self.admin_views:
+            if hasattr(self, link[1]):
+
                 # Build URL from known info
                 info = self.model._meta.app_label, self.model._meta.module_name
-                self.output_urls.append(
+                admin_url = reverse('admin:index')
+                print(admin_url)
+                urls.append(
                     (
                         'view',
                          link[0],
-                         "/admin/%s/%s/%s" % (info[0],
-                                              info[1],
-                                              link[1])
+                         "%s%s/%s/%s/" % (admin_url,
+                                          info[0],
+                                          info[1],
+                                          link[1])
                     )
                 )
 
             else:
                 self.direct_links.append(link)
-                self.output_urls.append(('url', link[0], link[1]))
+                urls.append(('url', link[0], link[1]))
+        return urls
 
-        return added_urls + original_urls
 
